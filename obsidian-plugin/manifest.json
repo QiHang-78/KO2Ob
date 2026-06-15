@@ -1,0 +1,9 @@
+{
+  "id": "koreader-obsidian-sync",
+  "name": "KOReader Obsidian Sync",
+  "version": "0.1.0",
+  "minAppVersion": "1.5.0",
+  "description": "Pull KOReader highlights from a sync server into Markdown notes.",
+  "author": "OpenAI Codex",
+  "isDesktopOnly": false
+}

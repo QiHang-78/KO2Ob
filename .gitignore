@@ -11,3 +11,15 @@ wheels/
 
 # PyCharm specific
 .idea/
+
+# Node / build outputs
+node_modules/
+server/data/
+server/.data/
+server/*.log
+server/src/**/*.map
+obsidian-plugin/node_modules/
+obsidian-plugin/main.js
+obsidian-plugin/main.js.map
+obsidian-plugin/.obsidian/
+dist/

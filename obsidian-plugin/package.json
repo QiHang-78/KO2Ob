@@ -1,0 +1,17 @@
+{
+  "name": "koreader-obsidian-sync",
+  "version": "0.1.0",
+  "private": true,
+  "type": "module",
+  "main": "main.js",
+  "scripts": {
+    "dev": "node esbuild.config.mjs",
+    "build": "tsc -noEmit -skipLibCheck && node esbuild.config.mjs production"
+  },
+  "devDependencies": {
+    "@types/node": "^24.0.3",
+    "esbuild": "^0.25.5",
+    "obsidian": "latest",
+    "typescript": "^5.8.3"
+  }
+}

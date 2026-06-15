@@ -1,0 +1,22 @@
+services:
+  ko2ob-server:
+    build:
+      context: ./server
+    container_name: ko2ob-server
+    ports:
+      - "8787:8787"
+    environment:
+      KO2OB_HOST: 0.0.0.0
+      KO2OB_PORT: 8787
+      KO2OB_DATA_FILE: /app/data/store.json
+      KO2OB_API_KEY: ${KO2OB_API_KEY:-}
+      KO2OB_LOG_REQUESTS: ${KO2OB_LOG_REQUESTS:-true}
+    volumes:
+      - ./server/data:/app/data
+    restart: unless-stopped
+    healthcheck:
+      test: ["CMD", "node", "-e", "fetch('http://127.0.0.1:8787/health').then(r => { if (!r.ok) process.exit(1); }).catch(() => process.exit(1))"]
+      interval: 30s
+      timeout: 3s
+      retries: 3
+      start_period: 5s

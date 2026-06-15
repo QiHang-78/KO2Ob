@@ -1,7 +1,7 @@
 [project]
 name = "koreader-calibre-book-export"
 version = "0.1.0"
-description = "Add your description here"
+description = "Legacy single-script exporter kept for reference while the repo moves to a KOReader -> server -> Obsidian sync architecture."
 readme = "README.md"
 requires-python = ">=3.13"
 dependencies = []
