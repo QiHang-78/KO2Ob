@@ -69,7 +69,7 @@ export class KO2OBSettingTab extends PluginSettingTab {
 
 		new Setting(containerEl)
 			.setName("Output folder")
-			.setDesc("Folder inside the vault where Markdown notes will be written.")
+			.setDesc("Folder inside the vault where Markdown notes will be written. One book becomes one Markdown file.")
 			.addText((text) =>
 				text
 					.setPlaceholder("KOReader Highlights")
@@ -78,6 +78,11 @@ export class KO2OBSettingTab extends PluginSettingTab {
 						this.plugin.settings.outputFolder = value.trim() || DEFAULT_SETTINGS.outputFolder;
 						await this.plugin.saveSettings();
 					}),
+			)
+			.addButton((button) =>
+				button.setButtonText("Choose").onClick(() => {
+					this.plugin.openFolderPicker();
+				}),
 			);
 
 		new Setting(containerEl)

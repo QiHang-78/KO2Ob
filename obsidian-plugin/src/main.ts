@@ -1,4 +1,5 @@
 import {
+	FuzzySuggestModal,
 	Notice,
 	Plugin,
 	requestUrl,
@@ -144,6 +145,30 @@ function renderMarkdown(document: RemoteDocument, includeFrontmatter: boolean): 
 	return lines.join("\n");
 }
 
+class FolderSuggestModal extends FuzzySuggestModal<TFolder> {
+	private readonly folders: TFolder[];
+	private readonly onChoose: (folderPath: string) => Promise<void> | void;
+
+	constructor(plugin: KOReaderObsidianSyncPlugin, onChoose: (folderPath: string) => Promise<void> | void) {
+		super(plugin.app);
+		this.folders = plugin.app.vault.getAllFolders();
+		this.onChoose = onChoose;
+		this.setPlaceholder("Choose an output folder");
+	}
+
+	getItems(): TFolder[] {
+		return this.folders;
+	}
+
+	getItemText(folder: TFolder): string {
+		return folder.path || "/";
+	}
+
+	onChooseItem(folder: TFolder): void {
+		void this.onChoose(folder.path);
+	}
+}
+
 export default class KOReaderObsidianSyncPlugin extends Plugin {
 	settings!: KO2OBSettings;
 	private autoSyncTimer: number | null = null;
@@ -170,6 +195,14 @@ export default class KOReaderObsidianSyncPlugin extends Plugin {
 			callback: async () => {
 				await this.resetSyncState();
 				await this.syncFromServer(true);
+			},
+		});
+
+		this.addCommand({
+			id: "choose-output-folder",
+			name: "Choose output folder",
+			callback: async () => {
+				this.openFolderPicker();
 			},
 		});
 
@@ -225,6 +258,14 @@ export default class KOReaderObsidianSyncPlugin extends Plugin {
 		this.updateStatusBar();
 	}
 
+	openFolderPicker() {
+		new FolderSuggestModal(this, async (folderPath) => {
+			this.settings.outputFolder = folderPath || DEFAULT_SETTINGS.outputFolder;
+			await this.saveSettings();
+			new Notice(`KOReader output folder set to: ${this.settings.outputFolder}`);
+		}).open();
+	}
+
 	private buildHeaders(): Record<string, string> {
 		const headers: Record<string, string> = {
 			"Content-Type": "application/json",
@@ -235,7 +276,11 @@ export default class KOReaderObsidianSyncPlugin extends Plugin {
 		return headers;
 	}
 
-	private buildFilePath(document: RemoteDocument): string {
+	private getManagedFilePath(document: RemoteDocument): string {
+		const existingPath = this.settings.managedDocuments[document.id];
+		if (existingPath) {
+			return existingPath;
+		}
 		const template = this.settings.fileNameTemplate;
 		const fileName = sanitizeFileSegment(
 			template
@@ -285,7 +330,7 @@ export default class KOReaderObsidianSyncPlugin extends Plugin {
 
 	private async writeDocument(document: RemoteDocument): Promise<boolean> {
 		await this.ensureFolder(this.settings.outputFolder);
-		const filePath = this.buildFilePath(document);
+		const filePath = this.getManagedFilePath(document);
 		const content = renderMarkdown(document, this.settings.includeFrontmatter);
 		const existing = this.app.vault.getAbstractFileByPath(filePath);
 		if (existing instanceof TFile) {
